@@ -14,11 +14,10 @@ class SRTFPolicy(Policy):
         self._name = 'SRTF'
         self._allocation = {}
         self._scale_factors = {}
-        self._remaining_times = {}  # Tracks remaining execution time for jobs
+        self._remaining_times = {}
         self._rng = random.Random(seed) if seed is not None else random.Random()
 
     def update_remaining_times(self, job_updates):
-        # This method should be called to update the remaining times of jobs
         for job_id, remaining_time in job_updates.items():
             self._remaining_times[job_id] = remaining_time
 

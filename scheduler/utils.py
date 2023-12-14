@@ -13,7 +13,7 @@ from job import Job
 from job_table import JobTable
 from policies import allox, fifo, finish_time_fairness, gandiva, isolated, \
     max_min_fairness, max_min_fairness_water_filling, max_sum_throughput, \
-    min_total_duration, sjf, srtf
+    min_total_duration, sjf, srtf, lifo
 
 def _generate_scale_factor(rng):
     # Sample the scale factor from the Philly distribution.
@@ -199,8 +199,8 @@ def get_gpu_processes():
 
 def get_available_policies():
     return ['allox',
-            'sjf',
             'srtf',
+            'lifo',
             'fifo', 'fifo_perf', 'fifo_packed',
             'finish_time_fairness',
             'finish_time_fairness_perf',
@@ -445,6 +445,8 @@ def get_policy(policy_name, solver=None, seed=None,
         policy = fifo.FIFOPolicy(seed=seed)
     elif policy_name == 'srtf':
         policy = srtf.SRTFPolicy(seed=seed)
+    elif policy_name == 'lifo':
+        policy = lifo.LIFOPolicy(seed=seed)
     elif policy_name == 'sjf':
         policy = sjf.SJFPolicy(seed=seed)
     elif policy_name == 'fifo_perf':
