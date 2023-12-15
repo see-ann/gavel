@@ -200,6 +200,7 @@ def get_gpu_processes():
 def get_available_policies():
     return ['allox',
             'srtf',
+            'sjf',
             'lifo',
             'fifo', 'fifo_perf', 'fifo_packed',
             'finish_time_fairness',

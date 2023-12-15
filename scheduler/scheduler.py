@@ -216,6 +216,9 @@ class Scheduler:
         # Measured and predicted throughputs for all current incomplete
         # applications.
         self._throughputs = {}
+
+        self._remaining_times = {}  # Dictionary to store remaining times of jobs
+
         # Throughputs measured with respect to job types rather than
         # individual jobs.
         # TODO: Use this to replace self._throughputs.
@@ -1898,6 +1901,30 @@ class Scheduler:
                 completed_steps = self._total_steps_run[job_id]
                 print('Job %s: %d steps' % (job_id, completed_steps))
 
+    def get_fairness(self):
+        """Computes fairness based on the ratio of job completion time to total system runtime."""
+        with self._scheduler_lock:
+            # Calculate the total runtime of the system
+            total_runtime = self._current_timestamp - self._start_timestamp
+
+            fairness_ratios = []
+
+            # Iterate over each job and calculate its fairness ratio
+            for job_id, completion_time in self._job_completion_times.items():
+                if total_runtime > 0:
+                    fairness_ratio = completion_time / total_runtime
+                    fairness_ratios.append(fairness_ratio)
+                else:
+                    # Avoid division by zero
+                    fairness_ratios.append(0)
+
+            # Calculate the variance of the fairness ratios
+            variance = np.var(fairness_ratios) if fairness_ratios else 0
+            fairness_index = 1 / (1 + variance)  # Inverse of variance as a measure of fairness
+
+            print(f'Fairness index based on job completion times: {fairness_index:.3f}')
+            return fairness_index
+
     def get_cluster_utilization(self):
         """Computes the utilization of the cluster."""
         with self._scheduler_lock:
@@ -2117,6 +2144,10 @@ class Scheduler:
             allocation = self._policy.get_allocation(
                 throughputs, scale_factors,
                 times_since_start, num_steps_remaining,
+                cluster_spec)
+        elif  self._policy.name.startswith("SJFPolicy"):
+            allocation = self._policy.get_allocation(
+                throughputs, scale_factors,
                 cluster_spec)
         elif self._policy.name.startswith("FinishTimeFairness"):
             allocation = self._policy.get_allocation(

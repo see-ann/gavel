@@ -51,6 +51,7 @@ def main(args):
                    jobs_to_complete=jobs_to_complete)
     sched.get_average_jct(jobs_to_complete)
     sched.get_cluster_utilization()
+    sched.get_fairness()
     sched.get_num_lease_extensions()
     sched.shutdown()
 
